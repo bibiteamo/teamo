@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quem é a minha princesa?</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Comic Sans MS', cursive;
+      background: linear-gradient(to right, #ffe4e1, #fff0f5);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    h1 {
+      color: #d63384;
+      font-size: clamp(18px, 5vw, 28px);
+      margin-bottom: 30px;
+      padding: 0 15px;
+      text-shadow: 1px 1px 3px rgba(214, 51, 132, 0.2);
+      animation: fadeIn 1.5s ease;
+    }
+
+    .letters {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding: 0 15px;
+      max-width: 600px;
+      animation: fadeIn 2s ease;
+    }
+
+    .letter {
+      background-color: #ff69b4;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 18px;
+      font-size: 22px;
+      cursor: pointer;
+      transition: transform 0.2s ease, background-color 0.3s, box-shadow 0.3s;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .letter:hover {
+      transform: scale(1.1) translateY(-3px);
+      background-color: #ff85c1;
+      box-shadow: 0 5px 15px rgba(214, 51, 132, 0.3);
+    }
+
+    .letter:active {
+      transform: scale(0.95);
+    }
+
+    #typedAnswer {
+      margin-top: 20px;
+      font-size: 26px;
+      font-weight: bold;
+      color: #d63384;
+      letter-spacing: 4px;
+      min-height: 40px;
+      text-shadow: 1px 1px 2px rgba(214, 51, 132, 0.2);
+      animation: pulse 2s infinite;
+    }
+
+    #feedback {
+      color: #d63384;
+      font-size: 22px;
+      margin-top: 20px;
+      min-height: 60px;
+      padding: 0 20px;
+      max-width: 600px;
+    }
+
+    #nextButton {
+      display: none;
+      margin-top: 30px;
+      padding: 12px 25px;
+      font-size: 20px;
+      background: linear-gradient(to bottom, #ff85c1, #ff69b4);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(214, 51, 132, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    #nextButton:hover {
+      background: linear-gradient(to bottom, #ff69b4, #ff4aa2);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(214, 51, 132, 0.4);
+    }
+
+    #nextButton:active {
+      transform: translateY(-1px);
+    }
+
+    .heart {
+      position: absolute;
+      font-size: 20px;
+      color: #ff69b4;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    #resetButton {
+      background: transparent;
+      border: none;
+      color: #ff85c1;
+      cursor: pointer;
+      margin-top: 15px;
+      font-size: 16px;
+      padding: 5px 10px;
+      opacity: 0.7;
+      transition: opacity 0.3s ease;
+    }
+
+    #resetButton:hover {
+      opacity: 1;
+    }
+
+    .container {
+      padding: 30px;
+      background-color: rgba(255, 255, 255, 0.8);
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(214, 51, 132, 0.15);
+      max-width: 650px;
+      width: 90%;
+      backdrop-filter: blur(4px);
+      animation: fadeInUp 1s ease;
+      border: 2px solid rgba(255, 105, 180, 0.1);
+    }
+
+    /* Animações */
+    @keyframes heartbeat {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes pulse {
+      0% { opacity: 0.8; }
+      50% { opacity: 1; }
+      100% { opacity: 0.8; }
+    }
+
+    .celebrate {
+      animation: heartbeat 0.5s ease-in-out 3;
+    }
+    
+    /* Fundo com corações estático */
+    .bg-hearts {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+    }
+    
+    .bg-heart {
+      position: absolute;
+      color: rgba(255, 105, 180, 0.1);
+      font-size: 30px;
+    }
+
+    /* Loading screen */
+    #loadingScreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to right, #ffe4e1, #fff0f5);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      transition: opacity 0.5s ease;
+    }
+
+    .loading-heart {
+      font-size: 50px;
+      animation: pulse 1s infinite;
+    }
+
+    .loading-text {
+      margin-top: 20px;
+      color: #d63384;
+      font-size: 22px;
+    }
+
+    /* Responsividade */
+    @media (max-width: 480px) {
+      .letters {
+        gap: 8px;
+      }
+
+      .letter {
+        padding: 10px 15px;
+        font-size: 18px;
+      }
+
+      #typedAnswer {
+        font-size: 22px;
+      }
+
+      .container {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading Screen -->
+  <div id="loadingScreen">
+    <div class="loading-heart">💖</div>
+    <div class="loading-text">Carregando surpresa...</div>
+  </div>
+
+  <!-- Background Hearts -->
+  <div class="bg-hearts" id="bgHearts"></div>
+
+  <div class="container">
+    <h1>Para ir para a próxima página só uma pessoa (o meu amor) saberá responder essa pergunta...<br>Quem é a minha princesinha?</h1>
+    <div class="letters" id="lettersContainer"></div>
+    <div id="typedAnswer"></div>
+    <div id="feedback"></div>
+    <button id="resetButton" style="display: none;">Limpar</button>
+    <button id="nextButton" onclick="goToNextPage()">Clique aqui para ir para a segunda página</button>
+  </div>
+
+  <!-- Áudios -->
+  <audio id="clickSound" preload="auto">
+    <source src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_bb630cc098.mp3?filename=tiny-button-push-10694.mp3" type="audio/mpeg">
+  </audio>
+  <audio id="successSound" preload="auto">
+    <source src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_0625c6a442.mp3?filename=success-1-6297.mp3" type="audio/mpeg">
+  </audio>
+  <audio id="bgMusic" loop preload="auto">
+    <source src="https://cdn.pixabay.com/download/audio/2022/10/03/audio_3b1732cf8a.mp3?filename=soft-piano-background-119467.mp3" type="audio/mpeg">
+  </audio>
+
+  <script src="coracoes.js"></script>
+  <script>
+    // Constantes
+    const answer = "bibi";
+    let input = "";
+    const container = document.getElementById("lettersContainer");
+    const feedback = document.getElementById("feedback");
+    const typedAnswer = document.getElementById("typedAnswer");
+    const nextButton = document.getElementById("nextButton");
+    const resetButton = document.getElementById("resetButton");
+    const loadingScreen = document.getElementById("loadingScreen");
+    const bgHearts = document.getElementById("bgHearts");
+    const clickSound = document.getElementById("clickSound");
+    const successSound = document.getElementById("successSound");
+    const bgMusic = document.getElementById("bgMusic");
+    
+    // Variáveis de estado
+    let soundEnabled = false;
+    
+    // Função para remover tela de carregamento
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        loadingScreen.style.opacity = '0';
+        setTimeout(() => {
+          loadingScreen.style.display = 'none';
+          
+          // Adicionar corações ao fundo
+          createBackgroundHearts();
+          
+          // Iniciar música de fundo com um clique do usuário
+          document.addEventListener('click', function iniciarMusica() {
+            bgMusic.volume = 0.3;
+            bgMusic.play().catch(e => console.log('Erro ao reproduzir música:', e));
+            soundEnabled = true;
+            document.removeEventListener('click', iniciarMusica);
+          }, { once: true });
+        }, 500);
+      }, 1500);
+    });
+    
+    // Criar corações de fundo estáticos
+    function createBackgroundHearts() {
+      for (let i = 0; i < 20; i++) {
+        const heart = document.createElement('div');
+        heart.classList.add('bg-heart');
+        heart.innerHTML = '💖';
+        heart.style.left = `${Math.random() * 100}%`;
+        heart.style.top = `${Math.random() * 100}%`;
+        heart.style.fontSize = `${Math.random() * 30 + 20}px`;
+        heart.style.opacity = `${Math.random() * 0.2 + 0.05}`;
+        heart.style.transform = `rotate(${Math.random() * 360}deg)`;
+        bgHearts.appendChild(heart);
+      }
+    }
+
+    // Função para tocar som de clique
+    function playClickSound() {
+      if (soundEnabled) {
+        clickSound.currentTime = 0;
+        clickSound.volume = 0.3;
+        clickSound.play().catch(e => {});
+      }
+    }
+    
+    // Função para tocar som de sucesso
+    function playSuccessSound() {
+      if (soundEnabled) {
+        successSound.volume = 0.4;
+        successSound.play().catch(e => {});
+      }
+    }
+
+    // Letras disponíveis (adicionei mais algumas para dificultar um pouco)
+    const letters = Array.from(new Set(answer.split("").concat("a","c","d","e","u","i","b","p","m","r","s"))).sort(() => Math.random() - 0.5);
+
+    // Criar botões de letras
+    letters.forEach(letter => {
+      const btn = document.createElement("button");
+      btn.className = "letter";
+      btn.innerText = letter;
+      btn.onclick = () => {
+        if (input.length < answer.length) {
+          playClickSound();
+          input += letter;
+          updateTypedAnswer();
+          coracoesDoElemento(btn, 'click', 1); // Adiciona um coração ao clicar
+          
+          if (input.length === answer.length) {
+            checkAnswer();
+          }
+        }
+      };
+      container.appendChild(btn);
+    });
+
+    // Atualizar resposta digitada
+    function updateTypedAnswer() {
+      typedAnswer.innerText = input;
+      resetButton.style.display = "inline-block";
+    }
+
+    // Verificar resposta
+    function checkAnswer() {
+      if (input.toLowerCase() === answer.toLowerCase()) {
+        playSuccessSound();
+        feedback.innerText = "Sim!!!! É a Bibi, que bom que sabe amorzinho, agora você pode ir para a segunda parte 👀";
+        feedback.classList.add("celebrate");
+        nextButton.style.display = "inline-block";
+        chuvaDeCoracoes(50, 40); // Corrigido de chuvaDeCorcaoes para chuvaDeCoracoes
+      } else {
+        feedback.innerText = "Hmm, não é isso... se vc nao for a minha princesa saia daqui agora 😡😡";
+        setTimeout(() => {
+          input = "";
+          updateTypedAnswer();
+          feedback.innerText = "";
+        }, 1500);
+      }
+    }
+
+    // Reset button
+    resetButton.addEventListener('click', () => {
+      playClickSound();
+      input = "";
+      updateTypedAnswer();
+      feedback.innerText = "";
+      resetButton.style.display = "none";
+    });
+
+    // Ir para a próxima página
+    function goToNextPage() {
+      playSuccessSound();
+      transicaoComCoracoes("pagina2.html");
+    }
+
+    // Criar corações aleatórios para o fundo
+    setInterval(() => {
+      if (Math.random() < 0.3) { // 30% de chance a cada intervalo
+        criarCoracao(
+          Math.random() * window.innerWidth,
+          window.innerHeight,
+          Math.random() * 10 + 15,
+          Math.random() * 2000 + 3000
+        );
+      }
+    }, 500);
+
+    // Adicionar evento de teclado para facilitar testes
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace') {
+        input = input.slice(0, -1);
+        updateTypedAnswer();
+      } else if (letters.includes(e.key.toLowerCase()) && input.length < answer.length) {
+        playClickSound();
+        input += e.key.toLowerCase();
+        updateTypedAnswer();
+        
+        if (input.length === answer.length) {
+          checkAnswer();
+        }
+      }
+    });
+    
+    // Corrigir a função para chuva de corações se não estiver definida corretamente
+    if (typeof chuvaDeCoracoes !== 'function' && typeof chuvaDeCorcaoes === 'function') {
+      window.chuvaDeCoracoes = chuvaDeCorcaoes;
+    }
+  </script>
+</body>
+</html>

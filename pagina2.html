@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Raspadinha do Amor</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Comic Sans MS', cursive;
+      background: linear-gradient(to right, #fff0f5, #ffe4e1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+      text-align: center;
+      padding: 20px 0;
+    }
+    h1 {
+      color: #d63384;
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: clamp(18px, 5vw, 24px);
+      padding: 0 15px;
+      animation: fadeIn 1s ease;
+    }
+    .canvas-container {
+      position: relative;
+      width: 90%;
+      max-width: 300px;
+      height: 200px;
+      margin: 0 auto;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 8px 20px rgba(214, 51, 132, 0.3);
+    }
+    #messageCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 0;
+      width: 100%;
+      height: 100%;
+    }
+    #scratchCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: 3px dashed #ff69b4;
+      border-radius: 15px;
+      cursor: pointer;
+      z-index: 1;
+    }
+    #progressBar {
+      width: 90%;
+      max-width: 300px;
+      height: 12px;
+      background-color: #ffcce5;
+      border-radius: 10px;
+      margin-top: 20px;
+      overflow: hidden;
+      box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    #progressFill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(to right, #ff69b4, #ff85c1);
+      transition: width 0.3s ease;
+      border-radius: 10px;
+    }
+    #nextBtn {
+      display: none;
+      margin-top: 25px;
+      padding: 12px 25px;
+      font-size: 18px;
+      background: linear-gradient(to bottom, #ff85c1, #ff69b4);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(214, 51, 132, 0.4);
+      font-family: 'Comic Sans MS', cursive;
+    }
+    #nextBtn:hover {
+      background: linear-gradient(to bottom, #ff69b4, #ff4aa2);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(214, 51, 132, 0.5);
+    }
+    #nextBtn:active {
+      transform: translateY(1px);
+    }
+    .heart {
+      position: absolute;
+      color: #ff69b4;
+      font-size: 20px;
+      pointer-events: none;
+    }
+    #instructions {
+      color: #d63384;
+      font-size: 16px;
+      margin-top: 15px;
+      max-width: 300px;
+      text-align: center;
+      opacity: 0.8;
+      background-color: rgba(255, 255, 255, 0.6);
+      padding: 8px 12px;
+      border-radius: 20px;
+      animation: pulse 2s infinite;
+    }
+    #resetBtn {
+      background: transparent;
+      border: 1px solid #ff85c1;
+      color: #ff69b4;
+      padding: 8px 15px;
+      border-radius: 20px;
+      margin-top: 15px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      display: none;
+    }
+    #resetBtn:hover {
+      background-color: rgba(255, 105, 180, 0.1);
+    }
+    .confetti {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background-color: #ff85c1;
+      pointer-events: none;
+      opacity: 0;
+    }
+    #soundToggle {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: transparent;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #ff69b4;
+      z-index: 10;
+    }
+    
+    /* Animações */
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(1.05); opacity: 1; }
+      100% { transform: scale(1); opacity: 0.8; }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes confettiFall {
+      0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+    }
+    
+    /* Responsividade para dispositivos pequenos */
+    @media (max-height: 600px) {
+      body {
+        padding: 10px 0;
+      }
+      h1 {
+        margin-bottom: 10px;
+        font-size: 18px;
+      }
+      .canvas-container {
+        height: 150px;
+      }
+      #progressBar {
+        margin-top: 10px;
+      }
+      #instructions {
+        font-size: 14px;
+        margin-top: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <button id="soundToggle">🔊</button>
+  <h1>Muito bem! Agora que eu sei que é a minha menininha, raspe para ver a surpresa que voce ganhou!</h1>
+  <div class="canvas-container">
+    <canvas id="messageCanvas" width="300" height="200"></canvas>
+    <canvas id="scratchCanvas" width="300" height="200"></canvas>
+  </div>
+  <div id="progressBar"><div id="progressFill"></div></div>
+  <div id="instructions">Arraste o dedo para raspar</div>
+  <button id="resetBtn">Começar de novo</button>
+  <button id="nextBtn">e agora o momento da verdade...</button>
+
+  <audio id="scratchSound" preload="auto">
+    <source src="https://cdn.pixabay.com/download/audio/2022/03/10/audio_ac1cc65fad.mp3?filename=scratch-16-44297.mp3" type="audio/mpeg">
+  </audio>
+  <audio id="successSound" preload="auto">
+    <source src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_0625c6a442.mp3?filename=success-1-6297.mp3" type="audio/mpeg">
+  </audio>
+  <audio id="bgMusic" loop preload="auto">
+    <source src="https://cdn.pixabay.com/download/audio/2022/10/03/audio_3b1732cf8a.mp3?filename=soft-piano-background-119467.mp3" type="audio/mpeg">
+  </audio>
+
+  <script src="coracoes.js"></script>
+  <script>
+    const canvas = document.getElementById('scratchCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const msgCanvas = document.getElementById('messageCanvas');
+    const msgCtx = msgCanvas.getContext('2d');
+    
+    const progressFill = document.getElementById('progressFill');
+    const nextBtn = document.getElementById('nextBtn');
+    const instructions = document.getElementById('instructions');
+    const resetBtn = document.getElementById('resetBtn');
+    const soundToggle = document.getElementById('soundToggle');
+    
+    // Sons
+    const scratchSound = document.getElementById('scratchSound');
+    const successSound = document.getElementById('successSound');
+    const bgMusic = document.getElementById('bgMusic');
+    
+    let soundEnabled = false;
+    let scratchInterval = null;
+    let revealed = false;
+    let lastProgress = 0;
+    let isDrawing = false;
+    let prevX, prevY;
+    let touchStarted = false;
+    
+    // Gerenciar sons
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      soundToggle.textContent = soundEnabled ? '🔊' : '🔇';
+      
+      if (soundEnabled) {
+        bgMusic.volume = 0.3;
+        bgMusic.play().catch(e => console.log('Erro ao reproduzir áudio:', e));
+      } else {
+        bgMusic.pause();
+      }
+    }
+    
+    soundToggle.addEventListener('click', toggleSound);
+    
+    // Função para tocar som de raspadinha
+    function playScratchSound() {
+      if (!soundEnabled) return;
+      
+      scratchSound.currentTime = 0;
+      scratchSound.volume = 0.2;
+      scratchSound.play().catch(e => {});
+    }
+    
+    // Função para tocar som de sucesso
+    function playSuccessSound() {
+      if (!soundEnabled) return;
+      
+      successSound.volume = 0.4;
+      successSound.play().catch(e => {});
+    }
+
+    // Assegurar que a proporção dos canvas seja mantida
+    function resizeCanvas() {
+      const container = document.querySelector('.canvas-container');
+      const containerWidth = container.clientWidth;
+      const containerHeight = container.clientHeight;
+      
+      canvas.width = containerWidth;
+      canvas.height = containerHeight;
+      msgCanvas.width = containerWidth;
+      msgCanvas.height = containerHeight;
+      
+      // Redesenhar a mensagem e a camada de raspar
+      drawMessage();
+      drawScratchLayer();
+    }
+
+    // Desenhar a mensagem
+    function drawMessage() {
+      msgCtx.clearRect(0, 0, msgCanvas.width, msgCanvas.height);
+      
+      // Adicionar um fundo decorativo para a mensagem
+      const gradient = msgCtx.createLinearGradient(0, 0, 0, msgCanvas.height);
+      gradient.addColorStop(0, '#ffffff');
+      gradient.addColorStop(1, '#fff5f8');
+      msgCtx.fillStyle = gradient;
+      msgCtx.fillRect(0, 0, msgCanvas.width, msgCanvas.height);
+      
+      // Desenhar bordas decorativas
+      msgCtx.strokeStyle = '#ff85c1';
+      msgCtx.lineWidth = 3;
+      msgCtx.strokeRect(10, 10, msgCanvas.width - 20, msgCanvas.height - 20);
+      
+      // Desenhar corações decorativos
+      msgCtx.fillStyle = '#ffcce5';
+      drawHeart(msgCtx, 30, 30, 15);
+      drawHeart(msgCtx, msgCanvas.width - 30, 30, 15);
+      drawHeart(msgCtx, 30, msgCanvas.height - 30, 15);
+      drawHeart(msgCtx, msgCanvas.width - 30, msgCanvas.height - 30, 15);
+      
+      // Texto da mensagem
+      msgCtx.fillStyle = '#d63384';
+      msgCtx.font = 'bold 16px Comic Sans MS';
+      msgCtx.textAlign = 'center';
+      msgCtx.textBaseline = 'middle';
+      
+      wrapText(
+        msgCtx,
+        'Que sorte!!! Você vai escolher um dia para que o David diga SIM pra você por 1 dia inteirinho. Use bem!!',
+        msgCanvas.width / 2,
+        msgCanvas.height / 2 - 10,
+        msgCanvas.width - 40,
+        24
+      );
+    }
+
+    // Desenhar a camada de raspar
+    function drawScratchLayer() {
+      ctx.globalCompositeOperation = 'source-over';
+      
+      // Gradiente para a raspadinha
+      const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+      gradient.addColorStop(0, '#ffd6e8');
+      gradient.addColorStop(1, '#ffcce5');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Adicionar textura à raspadinha
+      ctx.fillStyle = '#ffcce5';
+      for (let i = 0; i < 300; i++) {
+        const x = Math.random() * canvas.width;
+        const y = Math.random() * canvas.height;
+        const size = Math.random() * 4 + 1;
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      
+      // Desenhar alguns símbolos de coração
+      ctx.fillStyle = '#ff85c1';
+      for (let i = 0; i < 15; i++) {
+        const x = Math.random() * canvas.width;
+        const y = Math.random() * canvas.height;
+        const size = Math.random() * 8 + 5;
+        drawHeart(ctx, x, y, size);
+      }
+      
+      // Adicionar texto de instrução na raspadinha
+      ctx.fillStyle = '#ff4aa2';
+      ctx.font = 'bold 14px Comic Sans MS';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('RASPE AQUI!', canvas.width / 2, canvas.height / 2);
+      ctx.fillText('👆', canvas.width / 2, canvas.height / 2 + 25);
+    }
+
+    // Função para desenhar um coração
+    function drawHeart(context, x, y, size) {
+      context.save();
+      context.beginPath();
+      context.translate(x, y);
+      context.scale(size / 10, size / 10);
+      context.moveTo(0, -4);
+      context.bezierCurveTo(-5, -10, -10, -5, -10, 0);
+      context.bezierCurveTo(-10, 5, -5, 10, 0, 15);
+      context.bezierCurveTo(5, 10, 10, 5, 10, 0);
+      context.bezierCurveTo(10, -5, 5, -10, 0, -4);
+      context.closePath();
+      context.fill();
+      context.restore();
+    }
+
+    // Função para envolver o texto
+    function wrapText(context, text, x, y, maxWidth, lineHeight) {
+      const words = text.split(' ');
+      let line = '';
+      for(let n = 0; n < words.length; n++) {
+        const testLine = line + words[n] + ' ';
+        const metrics = context.measureText(testLine);
+        const testWidth = metrics.width;
+        if (testWidth > maxWidth && n > 0) {
+          context.fillText(line, x, y);
+          line = words[n] + ' ';
+          y += lineHeight;
+        } else {
+          line = testLine;
+        }
+      }
+      context.fillText(line, x, y);
+    }
+    
+    // Criar confete para celebração
+    function createConfetti() {
+      for (let i = 0; i < 100; i++) {
+        setTimeout(() => {
+          const confetti = document.createElement('div');
+          confetti.className = 'confetti';
+          
+          // Cores aleatórias
+          const colors = ['#ff69b4', '#ffcce5', '#ff85c1', '#ffd6e8', '#d63384'];
+          confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+          
+          // Formas aleatórias (círculo, quadrado, coração)
+          const shapes = ['50%', '0%', '0% 30% 0% 30%'];
+          confetti.style.borderRadius = shapes[Math.floor(Math.random() * shapes.length)];
+          
+          // Posição e tamanho aleatórios
+          confetti.style.left = Math.random() * 100 + 'vw';
+          confetti.style.width = Math.random() * 10 + 5 + 'px';
+          confetti.style.height = Math.random() * 10 + 5 + 'px';
+          
+          // Animação
+          confetti.style.animation = `confettiFall ${Math.random() * 3 + 2}s linear forwards`;
+          
+          document.body.appendChild(confetti);
+          
+          // Remover após a animação
+          setTimeout(() => {
+            confetti.remove();
+          }, 5000);
+        }, i * 20);
+      }
+    }
+
+    // Inicializar
+    function init() {
+      resizeCanvas();
+      // Mostrar o botão de reset quando inicializado (em desktop)
+      resetBtn.style.display = 'inline-block';
+    }
+    
+    // Resetar o jogo
+    function resetGame() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawScratchLayer();
+      progressFill.style.width = '0%';
+      revealed = false;
+      lastProgress = 0;
+      
+      if (nextBtn.style.display === 'block') {
+        nextBtn.style.display = 'none';
+        nextBtn.classList.remove('pulse');
+        instructions.style.display = 'block';
+      }
+    }
+
+    // Obter posição do mouse/toque
+    function getPosition(evt) {
+      const rect = canvas.getBoundingClientRect();
+      const clientX = evt.clientX || (evt.touches && evt.touches[0] ? evt.touches[0].clientX : 0);
+      const clientY = evt.clientY || (evt.touches && evt.touches[0] ? evt.touches[0].clientY : 0);
+      return {
+        x: clientX - rect.left,
+        y: clientY - rect.top
+      };
+    }
+
+    // Função de desenho (raspar)
+    function draw(evt) {
+      if (!isDrawing) return;
+      
+      const pos = getPosition(evt);
+      ctx.globalCompositeOperation = 'destination-out';
+      
+      // Desenhar linha entre pontos para toque contínuo
+      if (prevX !== undefined && prevY !== undefined) {
+        ctx.beginPath();
+        ctx.lineWidth = 30;  // Aumentar espessura para facilitar em dispositivos móveis
+        ctx.lineCap = 'round';
+        ctx.moveTo(prevX, prevY);
+        ctx.lineTo(pos.x, pos.y);
+        ctx.stroke();
+      }
+      
+      ctx.beginPath();
+      ctx.arc(pos.x, pos.y, 15, 0, Math.PI * 2);
+      ctx.fill();
+      
+      prevX = pos.x;
+      prevY = pos.y;
+      
+      // Tocar som de raspadinha em intervalos
+      if (scratchInterval === null) {
+        playScratchSound();
+        scratchInterval = setInterval(playScratchSound, 300);
+      }
+      
+      // Criar efeito visual de corações ao raspar
+      if (Math.random() < 0.2) {
+        const rect = canvas.getBoundingClientRect();
+        criarCoracao(rect.left + pos.x, rect.top + pos.y);
+      }
+      
+      // Verificar progresso
+      checkProgress();
+    }
+
+    // Verificar quanto da raspadinha foi revelada
+    function checkProgress() {
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+      let cleared = 0;
+      let total = 0;
+      
+      // Amostragem para melhor performance (verificar a cada 16 pixels)
+      for (let i = 0; i < imageData.length; i += 16) {
+        total++;
+        if (imageData[i + 3] < 128) cleared++;
+      }
+      
+      const percent = (cleared / total) * 100;
+      progressFill.style.width = percent + '%';
+      
+      // Quando 40% for raspado, mostrar o botão
+      if (percent > 40 && !revealed) {
+        revealed = true;
+        nextBtn.style.display = 'block';
+        nextBtn.classList.add('pulse');
+        instructions.style.display = 'none';
+        
+        // Celebração
+        chuvaDeCorcaoes(20);
+        createConfetti();
+        playSuccessSound();
+      }
+      
+      // Feedback visual adicional com base no progresso
+      if (percent > lastProgress + 10) {
+        lastProgress = percent;
+        
+        // Adicione mais corações a cada 10% de progresso
+        for (let i = 0; i < 3; i++) {
+          const x = Math.random() * window.innerWidth;
+          const y = Math.random() * window.innerHeight;
+          criarCoracao(x, y);
+        }
+      }
+    }
+
+    // Parar o som de raspadinha
+    function stopScratchSound() {
+      if (scratchInterval) {
+        clearInterval(scratchInterval);
+        scratchInterval = null;
+      }
+    }
+
+    // Eventos de mouse
+    canvas.addEventListener('mousedown', (e) => {
+      isDrawing = true;
+      prevX = undefined;
+      prevY = undefined;
+      draw(e);
+    });
+    
+    canvas.addEventListener('mousemove', draw);
+    
+    canvas.addEventListener('mouseup', () => {
+      isDrawing = false;
+      prevX = undefined;
+      prevY = undefined;
+      stopScratchSound();
+    });
+    
+    canvas.addEventListener('mouseleave', () => {
+      isDrawing = false;
+      stopScratchSound();
+    });
+
+    // Eventos de toque (otimizados para melhor desempenho em dispositivos móveis)
+    canvas.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      touchStarted = true;
+      isDrawing = true;
+      prevX = undefined;
+      prevY = undefined;
+      draw(e);
+    }, { passive: false });
+    
+    canvas.addEventListener('touchmove', (e) => {
+      if (touchStarted) {
+        e.preventDefault();
+        draw(e);
+      }
+    }, { passive: false });
+    
+    canvas.addEventListener('touchend', (e) => {
+      if (touchStarted) {
+        e.preventDefault();
+        isDrawing = false;
+        touchStarted = false;
+        prevX = undefined;
+        prevY = undefined;
+        stopScratchSound();
+      }
+    }, { passive: false });
+
+    // Botão de reset
+    resetBtn.addEventListener('click', resetGame);
+
+    // Botão de transição
+    nextBtn.addEventListener('click', () => {
+      playSuccessSound();
+      transicaoComCoracoes('pagina3.html', 40);
+    });
+
+    // Criar alguns corações aleatórios na tela
+    setInterval(() => {
+      if (Math.random() < 0.3) {
+        criarCoracao(
+          Math.random() * window.innerWidth,
+          window.innerHeight,
+          Math.random() * 10 + 15,
+          Math.random() * 2000 + 3000
+        );
+      }
+    }, 800);
+
+    // Lidar com redimensionamento da janela
+    window.addEventListener('resize', resizeCanvas);
+    
+    // Tentar carregar os sons antecipadamente
+    document.addEventListener('click', function initialClickHandler() {
+      // Pré-carregar sons
+      scratchSound.load();
+      successSound.load();
+      bgMusic.load();
+      
+      // Remover este handler após o primeiro clique
+      document.removeEventListener('click', initialClickHandler);
+    });
+
+    // Inicializar o jogo
+    init();
+  </script>
+</body>
+</html>

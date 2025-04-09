@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quem Ama Mais?</title>
+  <style>
+    body {
+      margin: 0;
+      background: linear-gradient(135deg, #ffe4f5, #ffdee9, #fff0f5);
+      background-size: 300% 300%;
+      animation: gradientBG 15s ease infinite;
+      font-family: 'Comic Sans MS', cursive;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+      text-align: center;
+      padding: 20px;
+    }
+
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      max-width: 600px;
+      padding: 20px;
+      background-color: rgba(255, 255, 255, 0.7);
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(214, 51, 132, 0.2);
+      backdrop-filter: blur(8px);
+      animation: fadeInScale 1.2s ease;
+    }
+
+    h1 {
+      color: #d63384;
+      text-align: center;
+      margin-bottom: 30px;
+      animation: fadeIn 2s ease;
+      font-size: clamp(24px, 5vw, 36px);
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    .btns {
+      display: flex;
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+
+    .btn {
+      padding: 15px 30px;
+      font-size: 20px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      font-family: inherit;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #david {
+      background: linear-gradient(to bottom, #ff85c1, #ff69b4);
+      color: white;
+    }
+
+    #david:before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: 0.5s;
+    }
+
+    #david:hover:before {
+      left: 100%;
+    }
+
+    #david:active {
+      transform: scale(0.95);
+    }
+
+    #bibi {
+      background: linear-gradient(to bottom, #ffffff, #fff8fa);
+      color: #d63384;
+      border: 2px solid #ff85c1;
+      position: relative;
+      z-index: 10;
+    }
+
+    #bibi:hover {
+      box-shadow: 0 6px 12px rgba(255, 105, 180, 0.3);
+    }
+
+    #final-msg {
+      display: none;
+      text-align: center;
+      margin: 20px 0;
+      color: #d63384;
+      font-size: 22px;
+      animation: bounceIn 1s ease;
+      background-color: rgba(255, 255, 255, 0.7);
+      padding: 15px 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(214, 51, 132, 0.2);
+      max-width: 400px;
+    }
+
+    #btn-final {
+      display: none;
+      margin-top: 20px;
+      padding: 15px 30px;
+      font-size: 18px;
+      background: linear-gradient(to bottom, #ff85c1, #ff69b4);
+      border: none;
+      color: white;
+      border-radius: 50px;
+      cursor: pointer;
+      animation: pulse 2s infinite;
+      box-shadow: 0 5px 15px rgba(214, 51, 132, 0.4);
+      transition: all 0.3s ease;
+      font-family: inherit;
+    }
+
+    #btn-final:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(214, 51, 132, 0.6);
+    }
+
+    #btn-final:active {
+      transform: translateY(-1px);
+    }
+
+    .heart {
+      position: fixed;
+      color: #ff69b4;
+      font-size: clamp(20px, 4vw, 30px);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .floating-hearts {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .floating-heart {
+      position: absolute;
+      opacity: 0.6;
+      animation: float 15s linear infinite;
+    }
+
+    #loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #ffe4f5;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      transition: opacity 0.5s ease;
+    }
+
+    .loading-heart {
+      font-size: 50px;
+      animation: pulse 1s infinite;
+    }
+
+    .loading-text {
+      margin-top: 20px;
+      color: #d63384;
+      font-size: 20px;
+    }
+
+    #sound-toggle {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: transparent;
+      border: none;
+      color: #ff69b4;
+      font-size: 24px;
+      cursor: pointer;
+      opacity: 0.7;
+      transition: all 0.3s ease;
+      z-index: 10;
+    }
+
+    #sound-toggle:hover {
+      opacity: 1;
+      transform: scale(1.1);
+    }
+
+    .count-display {
+      font-size: 14px;
+      margin-top: 10px;
+      color: #ff85c1;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    /* Animações */
+    @keyframes subir {
+      0% { 
+        transform: translateY(0) rotate(0deg); 
+        opacity: 1; 
+      }
+      100% { 
+        transform: translateY(-120vh) rotate(360deg); 
+        opacity: 0; 
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes bounceIn {
+      0% { transform: scale(0.5); opacity: 0; }
+      70% { transform: scale(1.1); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes fadeInScale {
+      0% { transform: scale(0.8); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes float {
+      0% {
+        transform: translateY(100%) translateX(-10%) rotate(0deg);
+        opacity: 0;
+      }
+      10% { opacity: 0.6; }
+      90% { opacity: 0.6; }
+      100% {
+        transform: translateY(-20%) translateX(10%) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    /* Responsividade */
+    @media (max-width: 600px) {
+      .btns {
+        flex-direction: column;
+        gap: 15px;
+      }
+      
+      h1 {
+        font-size: 22px;
+        margin-bottom: 20px;
+      }
+      
+      .container {
+        padding: 15px;
+        width: 90%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="loading-overlay">
+    <div class="loading-heart">💖</div>
+    <div class="loading-text">Carregando amor...</div>
+  </div>
+
+  <button id="sound-toggle">🔊</button>
+
+  <div class="floating-hearts" id="bg-hearts"></div>
+
+  <div class="container">
+    <h1>E agora chegou a hora de admitir... quem ama mais?</h1>
+    <div class="btns">
+      <button class="btn" id="david">David</button>
+      <button class="btn" id="bibi">Bibi</button>
+    </div>
+    <div id="final-msg">Finalmente admitiu!!! 🤭🤭 Você sabia que eu david conde te amo mais do que tudo? agora que sabe e adimitiu, voce pode ir para a ultima parte..</div>
+    <button id="btn-final">Ir para a última surpresa</button>
+    <div class="count-display" id="escape-count">Escapou: 0 vezes</div>
+  </div>
+
+  <audio id="bg-music" loop>
+    <source src="https://cdn.pixabay.com/download/audio/2022/10/03/audio_3b1732cf8a.mp3?filename=soft-piano-background-119467.mp3" type="audio/mpeg">
+    Seu navegador não suporta áudio.
+  </audio>
+  
+  <audio id="success-sound">
+    <source src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_0625c6a442.mp3?filename=success-1-6297.mp3" type="audio/mpeg">
+  </audio>
+  
+  <audio id="pop-sound">
+    <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=pop-94319.mp3" type="audio/mpeg">
+  </audio>
+
+  <script>
+    // Elementos DOM
+    const btnBibi = document.getElementById('bibi');
+    const btnDavid = document.getElementById('david');
+    const finalMsg = document.getElementById('final-msg');
+    const btnFinal = document.getElementById('btn-final');
+    const soundToggle = document.getElementById('sound-toggle');
+    const loadingOverlay = document.getElementById('loading-overlay');
+    const bgHearts = document.getElementById('bg-hearts');
+    const bgMusic = document.getElementById('bg-music');
+    const successSound = document.getElementById('success-sound');
+    const popSound = document.getElementById('pop-sound');
+    const escapeCount = document.getElementById('escape-count');
+    
+    // Estado
+    let soundEnabled = true;
+    let bibiBtnEscapes = 0;
+    
+    // Iniciar elementos de fundo após carregar a página
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        loadingOverlay.style.opacity = '0';
+        setTimeout(() => {
+          loadingOverlay.style.display = 'none';
+          
+          // Adicionar corações flutuantes ao fundo
+          adicionarCoracoesAoFundo();
+          
+          // Tocar música de fundo
+          if (soundEnabled) {
+            bgMusic.volume = 0.3;
+            bgMusic.play().catch(e => console.log('Erro ao reproduzir música:', e));
+          }
+        }, 500);
+      }, 1500);
+    });
+    
+    // Função para adicionar corações flutuantes ao fundo
+    function adicionarCoracoesAoFundo() {
+      for (let i = 0; i < 15; i++) {
+        const heart = document.createElement('div');
+        heart.classList.add('floating-heart');
+        heart.innerHTML = '💖';
+        heart.style.left = `${Math.random() * 100}%`;
+        heart.style.animationDuration = `${15 + Math.random() * 10}s`;
+        heart.style.animationDelay = `${Math.random() * 10}s`;
+        heart.style.fontSize = `${Math.random() * 20 + 20}px`;
+        heart.style.opacity = '0.3';
+        bgHearts.appendChild(heart);
+      }
+    }
+
+    // Função para criar corações na tela
+    function criarCoracao(x, y, tamanho = 20, duracao = 2000) {
+      const coracao = document.createElement("div");
+      coracao.classList.add("heart");
+      coracao.innerText = "💖";
+      coracao.style.fontSize = `${tamanho}px`;
+      
+      // Se não houver coordenadas, criar em posição aleatória
+      if (x === undefined || y === undefined) {
+        coracao.style.left = Math.random() * window.innerWidth + "px";
+        coracao.style.top = (window.innerHeight - 30) + "px";
+      } else {
+        coracao.style.left = `${x}px`;
+        coracao.style.top = `${y}px`;
+      }
+      
+      document.body.appendChild(coracao);
+      
+      // Animar o coração subindo
+      coracao.animate(
+        [
+          { transform: "translateY(0) rotate(0deg)", opacity: 1 },
+          { transform: "translateY(-100vh) rotate(360deg)", opacity: 0 }
+        ],
+        {
+          duration: duracao,
+          easing: "ease-out",
+          fill: "forwards"
+        }
+      );
+      
+      setTimeout(() => coracao.remove(), duracao);
+    }
+
+    // Função para criar explosão de corações
+    function explosaoDeCoracoes(x, y, quantidade = 20) {
+      for (let i = 0; i < quantidade; i++) {
+        setTimeout(() => {
+          const angulo = (i / quantidade) * 360;
+          const distancia = Math.random() * 100 + 50;
+          
+          const coracao = document.createElement("div");
+          coracao.classList.add("heart");
+          coracao.innerText = "💖";
+          coracao.style.fontSize = `${Math.random() * 10 + 15}px`;
+          coracao.style.left = `${x}px`;
+          coracao.style.top = `${y}px`;
+          
+          document.body.appendChild(coracao);
+          
+          // Animar em um padrão circular expandindo
+          coracao.animate(
+            [
+              { 
+                transform: "translate(0, 0) scale(0.5)", 
+                opacity: 1 
+              },
+              { 
+                transform: `translate(
+                  ${Math.cos(angulo * Math.PI / 180) * distancia}px, 
+                  ${Math.sin(angulo * Math.PI / 180) * distancia}px
+                ) scale(1)`, 
+                opacity: 0 
+              }
+            ],
+            {
+              duration: Math.random() * 1000 + 1000,
+              easing: "ease-out",
+              fill: "forwards"
+            }
+          );
+          
+          setTimeout(() => coracao.remove(), 2000);
+        }, i * 30);
+      }
+    }
+
+    // Função para criar chuva de corações
+    function chuvaDeCorcaoes(quantidade = 30, intervalo = 50) {
+      for (let i = 0; i < quantidade; i++) {
+        setTimeout(() => {
+          criarCoracao(
+            Math.random() * window.innerWidth,
+            window.innerHeight - 10,
+            Math.random() * 10 + 15, // tamanho entre 15-25px
+            Math.random() * 1000 + 1500 // duração entre 1.5-2.5s
+          );
+        }, i * intervalo);
+      }
+    }
+
+    // Controle de som
+    soundToggle.addEventListener('click', () => {
+      soundEnabled = !soundEnabled;
+      soundToggle.textContent = soundEnabled ? '🔊' : '🔇';
+      
+      if (soundEnabled) {
+        bgMusic.volume = 0.3;
+        bgMusic.play().catch(e => console.log('Erro ao reproduzir música:', e));
+      } else {
+        bgMusic.pause();
+      }
+    });
+    
+    // Função para tocar som pop
+    function playPopSound() {
+      if (soundEnabled) {
+        popSound.currentTime = 0;
+        popSound.volume = 0.4;
+        popSound.play().catch(e => {});
+      }
+    }
+    
+    // Função para tocar som de sucesso
+    function playSuccessSound() {
+      if (soundEnabled) {
+        successSound.volume = 0.5;
+        successSound.play().catch(e => {});
+      }
+    }
+
+    // Quando o botão "David" é clicado
+    btnDavid.addEventListener("click", (e) => {
+      // Obter coordenadas do clique
+      const rect = btnDavid.getBoundingClientRect();
+      const x = rect.left + rect.width/2;
+      const y = rect.top + rect.height/2;
+      
+      // Efeitos visuais
+      explosaoDeCoracoes(x, y, 30);
+      
+      // Atualizar interface
+      finalMsg.style.display = "block";
+      btnFinal.style.display = "inline-block";
+      escapeCount.style.opacity = "0";
+      
+      // Tocar som
+      playSuccessSound();
+      
+      // Adicionar mais alguns corações em diferentes partes
+      for (let i = 0; i < 5; i++) {
+        setTimeout(() => {
+          chuvaDeCorcaoes(10, 100);
+        }, i * 300);
+      }
+    });
+
+    // Fazer o botão "Bibi" escapar quando o usuário tenta clicar ou passar o mouse
+    let isMobile = 'ontouchstart' in window;
+    let availableSpace = {
+      width: window.innerWidth - 100,
+      height: window.innerHeight - 100
+    };
+    
+    // Função para mover o botão para uma posição aleatória segura
+    function moverBotao(e) {
+      e.preventDefault();
+      
+      playPopSound();
+      bibiBtnEscapes++;
+      escapeCount.style.opacity = "1";
+      escapeCount.textContent = `Escapou: ${bibiBtnEscapes} vezes`;
+      
+      const btnWidth = btnBibi.offsetWidth;
+      const btnHeight = btnBibi.offsetHeight;
+      
+      let newX = Math.floor(Math.random() * (availableSpace.width - btnWidth));
+      let newY = Math.floor(Math.random() * (availableSpace.height - btnHeight));
+      
+      // Garantir que fique a pelo menos 100px de distância da posição atual
+      const rect = btnBibi.getBoundingClientRect();
+      const currentX = rect.left;
+      const currentY = rect.top;
+      
+      while (Math.abs(newX - currentX) < 100 && Math.abs(newY - currentY) < 100) {
+        newX = Math.floor(Math.random() * (availableSpace.width - btnWidth));
+        newY = Math.floor(Math.random() * (availableSpace.height - btnHeight));
+      }
+      
+      btnBibi.style.position = 'fixed';
+      btnBibi.style.left = `${newX}px`;
+      btnBibi.style.top = `${newY}px`;
+      
+      // Efeito de rastro de corações ao mover
+      createHeartTrail(currentX + btnWidth/2, currentY + btnHeight/2, newX + btnWidth/2, newY + btnHeight/2);
+    }
+    
+    // Cria um rastro de corações entre duas posições
+    function createHeartTrail(x1, y1, x2, y2) {
+      const numHearts = 5;
+      for (let i = 0; i < numHearts; i++) {
+        const ratio = i / numHearts;
+        const x = x1 + (x2 - x1) * ratio;
+        const y = y1 + (y2 - y1) * ratio;
+        
+        setTimeout(() => {
+          criarCoracao(x, y, 15, 1000);
+        }, i * 100);
+      }
+    }
+
+    // Atualizar o espaço disponível quando a janela for redimensionada
+    window.addEventListener('resize', () => {
+      availableSpace = {
+        width: window.innerWidth - 100,
+        height: window.innerHeight - 100
+      };
+      
+      // Reposicionar o botão se estiver fora dos limites
+      const rect = btnBibi.getBoundingClientRect();
+      if (rect.right > window.innerWidth || rect.bottom > window.innerHeight || rect.left < 0 || rect.top < 0) {
+        btnBibi.style.position = 'static';
+      }
+    });
+
+    // Adicionar eventos para computador
+    btnBibi.addEventListener("mouseenter", moverBotao);
+    btnBibi.addEventListener("click", moverBotao);
+    
+    // Adicionar eventos para dispositivos móveis
+    btnBibi.addEventListener("touchstart", moverBotao);
+    
+    // Botão de ir para a página final
+    btnFinal.addEventListener("click", () => {
+      // Efeito de transição
+      chuvaDeCorcaoes(40, 40);
+      playSuccessSound();
+      
+      // Redirecionar após um pequeno atraso
+      setTimeout(() => {
+        window.location.href = 'https://youtu.be/VxQCyFRDcHY';
+      }, 1500);
+    });
+
+    // Criar corações aleatórios na tela periodicamente
+    setInterval(() => {
+      if (Math.random() < 0.3) {
+        criarCoracao(
+          Math.random() * window.innerWidth,
+          window.innerHeight,
+          Math.random() * 10 + 15,
+          Math.random() * 2000 + 3000
+        );
+      }
+    }, 1000);
+  </script>
+</body>
+</html>
